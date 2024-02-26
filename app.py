@@ -88,11 +88,11 @@ def show_entries():
 
     if sort_selected in ALLOWED_SORT_FIELDS:
         # Safely sorting based on predefined allowed fields
-        query = f'SELECT name, email, phone_number, address FROM entries ORDER BY {sort_selected}'
+        query = f'SELECT id, name, email, phone_number, address FROM entries ORDER BY {sort_selected}'
         entries = db.execute(query).fetchall()
     else:
         # If no sort is specified or it's not allowed, show all entries without sorting
-        entries = db.execute('SELECT name, email, phone_number, address FROM entries').fetchall()
+        entries = db.execute('SELECT id, name, email, phone_number, address FROM entries').fetchall()
 
     return render_template('show_entries.html', entries=entries)
 
@@ -103,6 +103,14 @@ def add_entry():
                [request.form['name'], request.form['email'], request.form['address'],request.form['phone']])
     db.commit()
     flash('New entry was successfully posted')
+    return redirect(url_for('show_entries'))
+
+
+@app.route('/delete', methods=['POST'])
+def delete_entry():
+    db = get_db()
+    db.execute('delete from entries where id = ?', [request.form['id']])
+    db.commit()
     return redirect(url_for('show_entries'))
 
 # @app.route('/select_category', methods=['POST'])
